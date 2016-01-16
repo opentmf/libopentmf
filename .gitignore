@@ -30,3 +30,23 @@
 
 # Debug files
 *.dSYM/
+
+*.hex
+
+# Files
+.directory
+INSTALL
+Makefile
+Makefile.in
+aclocal.m4
+configure
+config.log
+config.status
+libtool
+
+# Directories
+config
+m4
+autom4te.cache
+src/.deps
+src/.libs
