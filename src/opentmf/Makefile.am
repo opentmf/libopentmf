@@ -1,4 +1,5 @@
 otherincludedir = $(includedir)/opentmf
 otherinclude_HEADERS = \
 	common.h \
-	core.h
+	core.h \
+	driver.h

@@ -22,5 +22,6 @@
 
 #include <opentmf/common.h>
 #include <opentmf/core.h>
+#include <opentmf/driver.h>
 
 #endif

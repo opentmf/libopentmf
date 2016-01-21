@@ -17,19 +17,11 @@
  * License along with libopentmf; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _OPENTMF_CORE_H_
-#define _OPENTMF_CORE_H_
+#ifndef _DRIVER_H_
+#define _DRIVER_H_
 
-#include "common.h"
+#include "internal.h"
 
-#ifndef OPENTMF_DRIVER
-OPENTMF_API int opentmf_init(struct opentmf_context** ctx);
-OPENTMF_API int opentmf_exit(struct opentmf_context* ctx);
-OPENTMF_API const struct opentmf_version* opentmf_get_version();
-
-OPENTMF_API int opentmf_open(struct opentmf_context* ctx, const char* url, struct opentmf_handle** handle);
-OPENTMF_API int opentmf_close(struct opentmf_handle* handle);
-OPENTMF_API int opentmf_get_handle_type(struct opentmf_handle* handle);
-#endif
+int drv_open(struct opentmf_handle* handle, void* driver);
 
 #endif

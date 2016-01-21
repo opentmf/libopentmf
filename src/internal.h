@@ -23,9 +23,27 @@
 #include <stdlib.h>
 #include "opentmf/common.h"
 
+struct driver
+{
+  char* name;
+  struct opentmf_handle* handle;
+  struct driver* next;
+};
+
 struct opentmf_context
 {
   size_t ref_count;
+  struct driver* drivers;
+};
+
+struct opentmf_handle
+{
+  size_t ref_count;
+  enum opentmf_handle_type type;
+  struct opentmf_context* ctx;
+  void* handle_data;
+  void* private_data;
+  void (*close)(struct opentmf_handle* handle);
 };
 
 #endif

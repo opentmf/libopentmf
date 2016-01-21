@@ -17,19 +17,32 @@
  * License along with libopentmf; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _OPENTMF_CORE_H_
-#define _OPENTMF_CORE_H_
+#ifndef _OPENTMF_DRIVER_H_
+#define _OPENTMF_DRIVER_H_
 
 #include "common.h"
 
-#ifndef OPENTMF_DRIVER
-OPENTMF_API int opentmf_init(struct opentmf_context** ctx);
-OPENTMF_API int opentmf_exit(struct opentmf_context* ctx);
-OPENTMF_API const struct opentmf_version* opentmf_get_version();
+#define OPENTMF_LICENSE_GNU_LGPL_V3 "GNU LGPL v3"
+#define OPENTMF_LICENSE_GNU_LGPL_V2_1 "GNU LGPL v2.1"
+#define OPENTMF_LICENSE_MPL_2_0 "MPL-2.0" // Mozilla Public License 2.0
+#define OPENTMF_LICENSE_CC_ZERO_1_0 "CC0 1.0"
 
-OPENTMF_API int opentmf_open(struct opentmf_context* ctx, const char* url, struct opentmf_handle** handle);
-OPENTMF_API int opentmf_close(struct opentmf_handle* handle);
-OPENTMF_API int opentmf_get_handle_type(struct opentmf_handle* handle);
+struct opentmf_driver_info
+{
+  struct opentmf_version version;
+  const char* name;
+  const char* description;
+  const char* authors;
+  const char* license;
+  opentmf_bool non_free;
+};
+
+#ifdef OPENTMF_DRIVER
+OPENTMF_API int opentmf_drv_init(void** context_data);
+OPENTMF_API void opentmf_drv_fini(void* context_data);
+OPENTMF_API const struct opentmf_driver_info* opentmf_drv_get_info();
+#else
+OPENTMF_API const struct opentmf_driver_info* opentmf_drv_get_info(struct opentmf_handle* handle);
 #endif
 
 #endif

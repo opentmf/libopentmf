@@ -45,6 +45,13 @@ enum opentmf_status
   OPENTMF_E_NOT_SUPPORTED = -2,
   OPENTMF_E_FAILED = -3,
   OPENTMF_E_INVALID_PARAM = -4,
+  OPENTMF_E_INVALID_URL = -5,
+};
+
+enum opentmf_handle_type
+{
+  OPENTMF_HT_INVALID = 0,
+  OPENTMF_HT_DRIVER = 1,
 };
 
 struct opentmf_version
@@ -55,8 +62,14 @@ struct opentmf_version
   const char* extra;
 };
 
+typedef uint8_t opentmf_bool;
+
+#define OPENTMF_FALSE 0
+#define OPENTMF_TRUE 1
+
 #ifndef OPENTMF_DRIVER
 struct opentmf_context;
+struct opentmf_handle;
 #endif
 
 #endif
