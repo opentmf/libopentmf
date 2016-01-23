@@ -17,6 +17,7 @@
  * License along with libopentmf; If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
 #include <string.h>
 #include <dlfcn.h>
 #include "core.h"
@@ -26,6 +27,9 @@
 
 #define ID_LEN_MAX 1024
 #define PATH_LEN_MAX 2048
+
+#define URL_SEPERATOR '/'
+#define SEARCH_PATH_SEPERATOR ':'
 
 static const struct opentmf_version version = {
   .major = 0,
@@ -131,7 +135,7 @@ int create_handle(struct opentmf_context* ctx, struct opentmf_handle** handle, e
 
 int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opentmf_handle** handle)
 {
-  size_t driver_name_len = get_url_seperator_pos(*id);
+  size_t driver_name_len = get_seperator_pos(*id, URL_SEPERATOR);
   char driver_name[ID_LEN_MAX] = "";
 
   if(driver_name_len >= ID_LEN_MAX)
@@ -156,19 +160,43 @@ int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opent
 
   if(!driver_handle) // Try to open.
   {
-    char path[PATH_LEN_MAX] = OPENTMF_DRIVER_PATH;
-    size_t path_len = strlen(path);
+    const char* search_path = OPENTMF_DRIVER_PATH;
+    const char* env_path = getenv("OPENTMF_DRIVER_PATH");
+    char path[PATH_LEN_MAX] = "";
 
-    if(path_len + (1 + driver_name_len + 3) >= PATH_LEN_MAX)
-      return OPENTMF_E_INVALID_URL;
+    do
+    {
+      size_t path_len = get_seperator_pos(search_path, SEARCH_PATH_SEPERATOR);
 
-    if(path[path_len - 1] != '/')
-      strcat(path, "/");
-    strcat(path, driver_name);
-    strcat(path, ".so");
+      if(path_len + 1 + driver_name_len + 3 < PATH_LEN_MAX)
+      {
+        strncat(path, search_path, path_len);
+        if(path[path_len - 1] != '/')
+          strcat(path, "/");
+        strcat(path, driver_name);
+        strcat(path, ".so");
 
-    void* dl_handle = dlopen(path, RTLD_NOW);
-    if(!dl_handle)
+        if(access(path, R_OK) != -1)
+          break;
+
+        path[0] = '\0';
+      }
+
+      search_path += path_len;
+      if(search_path[0] == SEARCH_PATH_SEPERATOR)
+        search_path++;
+
+      if(search_path[0] == '\0' && env_path)
+      {
+        search_path = env_path;
+        env_path = NULL;
+        continue;
+      }
+    }
+    while(search_path[0] != '\0');
+
+    void* dl_handle;
+    if(path[0] == '\0' || !(dl_handle = dlopen(path, RTLD_NOW)))
       return OPENTMF_E_INVALID_URL;
 
     int r = create_handle(ctx, &driver_handle, OPENTMF_HT_DRIVER);
@@ -205,10 +233,10 @@ int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opent
   return OPENTMF_SUCCESS;
 }
 
-size_t get_url_seperator_pos(const char* str)
+size_t get_seperator_pos(const char* str, const char seperator)
 {
   size_t i = 0;
-  while(str[i] != '/' && str[i] != '\0')
+  while(str[i] != seperator && str[i] != '\0')
     i++;
   return i;
 }

@@ -24,6 +24,6 @@
 
 int create_handle(struct opentmf_context* ctx, struct opentmf_handle** handle, enum opentmf_handle_type type);
 int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opentmf_handle** handle);
-size_t get_url_seperator_pos(const char* str);
+size_t get_seperator_pos(const char* str, const char seperator);
 
 #endif
