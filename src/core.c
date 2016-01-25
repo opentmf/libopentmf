@@ -102,6 +102,8 @@ int opentmf_open(struct opentmf_context* ctx, const char* url, struct opentmf_ha
       *handle = driver_handle;
       return OPENTMF_SUCCESS;
     }
+    else
+      r = OPENTMF_E_INVALID_URL;
 
     opentmf_close(driver_handle);
   }
