@@ -70,6 +70,26 @@ const struct opentmf_version* opentmf_get_version()
   return &version;
 }
 
+const char* opentmf_get_status_str(int status)
+{
+  switch((enum opentmf_status)status)
+  {
+    case OPENTMF_SUCCESS:
+      return "Success";
+    case OPENTMF_E_NO_MEMORY:
+      return "No memory";
+    case OPENTMF_E_NOT_SUPPORTED:
+      return "Not supported";
+    case OPENTMF_E_FAILED:
+      return "Failed";
+    case OPENTMF_E_INVALID_PARAM:
+      return "Invalid parameter";
+    case OPENTMF_E_INVALID_URL:
+      return "Invalid URL";
+  }
+  return NULL;
+}
+
 int opentmf_close(struct opentmf_handle* handle)
 {
   if(!handle)
