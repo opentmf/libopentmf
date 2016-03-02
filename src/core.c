@@ -19,6 +19,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <dirent.h>
 #include <dlfcn.h>
 #include "core.h"
 #include "driver.h"
@@ -88,6 +89,98 @@ const char* opentmf_get_status_str(int status)
       return "Invalid URL";
   }
   return NULL;
+}
+
+int opentmf_get_driver_list(struct opentmf_context* ctx, char*** list)
+{
+  if(!ctx || !list)
+    return OPENTMF_E_INVALID_PARAM;
+
+  const char* search_path = OPENTMF_DRIVER_PATH;
+  const char* env_path = getenv("OPENTMF_DRIVER_PATH");
+
+  size_t length = 1;
+  size_t count = 0;
+  char** items = malloc(length * sizeof(char*));
+
+  do
+  {
+    size_t path_len = get_seperator_pos(search_path, SEARCH_PATH_SEPERATOR);
+    char* path = calloc(1, path_len + 1);
+
+    memcpy(path, search_path, path_len);
+
+    DIR* d = opendir(path);
+    if(d)
+    {
+      struct dirent* dir;
+      const char* dot;
+
+      while((dir = readdir(d)) != NULL)
+        switch(dir->d_type)
+        {
+          case DT_REG:
+          case DT_LNK:
+          case DT_UNKNOWN:
+            if((dot = strchr(dir->d_name, '.')) != NULL && strcmp(dot, ".so") == 0)
+            {
+              if(count + 1 == length)
+              {
+                length *= 2;
+                items = realloc(items, length * sizeof(char*));
+              }
+
+              const size_t name_len = strlen(dir->d_name) - 3;
+              items[count] = calloc(1, (name_len + 1) * sizeof(char));
+              memcpy(items[count], dir->d_name, name_len);
+
+              count++;
+            }
+            break;
+        }
+
+      closedir(d);
+    }
+
+    search_path += path_len;
+    if(search_path[0] == SEARCH_PATH_SEPERATOR)
+      search_path++;
+
+    if(search_path[0] == '\0' && env_path)
+    {
+      search_path = env_path;
+      env_path = NULL;
+      continue;
+    }
+  }
+  while(search_path[0] != '\0');
+
+  items[count] = NULL;
+
+  *list = items;
+  ctx->ref_count++;
+
+  return OPENTMF_SUCCESS;
+}
+
+int opentmf_free_driver_list(struct opentmf_context* ctx, char** list)
+{
+  if(!ctx || !list)
+    return OPENTMF_E_INVALID_PARAM;
+
+  char** p = list;
+
+  while(*p)
+  {
+    free(*p);
+    p++;
+  }
+
+  free(list);
+
+  ctx->ref_count--;
+
+  return OPENTMF_SUCCESS;
 }
 
 int opentmf_close(struct opentmf_handle* handle)

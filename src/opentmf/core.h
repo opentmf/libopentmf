@@ -28,6 +28,9 @@ OPENTMF_API int opentmf_exit(struct opentmf_context* ctx);
 OPENTMF_API const struct opentmf_version* opentmf_get_version();
 OPENTMF_API const char* opentmf_get_status_str(int status);
 
+OPENTMF_API int opentmf_get_driver_list(struct opentmf_context* ctx, char*** list);
+OPENTMF_API int opentmf_free_driver_list(struct opentmf_context* ctx, char** list);
+
 OPENTMF_API int opentmf_open(struct opentmf_context* ctx, const char* url, struct opentmf_handle** handle);
 OPENTMF_API int opentmf_close(struct opentmf_handle* handle);
 OPENTMF_API int opentmf_get_handle_type(struct opentmf_handle* handle);
