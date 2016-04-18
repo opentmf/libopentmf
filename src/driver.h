@@ -23,5 +23,6 @@
 #include "internal.h"
 
 int drv_open(struct opentmf_handle* handle, void* driver);
+int drv_open_device(struct opentmf_handle* handle, const char* id, struct opentmf_handle* device_handle);
 
 #endif

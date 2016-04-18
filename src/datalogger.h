@@ -17,17 +17,15 @@
  * License along with libopentmf; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CORE_H_
-#define _CORE_H_
+#ifndef _DATALOGGER_H_
+#define _DATALOGGER_H_
 
 #include "internal.h"
 
-#define HANDLE_ADD_REF(handle) { (handle)->ref_count++; }
-#define HANDLE_RELEASE_REF(handle) { if(--((handle)->ref_count) == 0){ free_handle(handle); } }
+struct dl_api;
 
-int create_handle(struct opentmf_context* ctx, struct opentmf_handle** handle);
-void free_handle(struct opentmf_handle* handle);
-int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opentmf_handle** handle);
-size_t get_seperator_pos(const char* str, const char seperator);
+int dl_load(void* driver, struct dl_api** api);
+int dl_open(struct opentmf_handle* handle, struct dl_api* api);
+const struct opentmf_device_info* dl_get_info(struct opentmf_handle* handle);
 
 #endif

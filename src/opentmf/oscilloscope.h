@@ -17,17 +17,26 @@
  * License along with libopentmf; If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _CORE_H_
-#define _CORE_H_
+#ifndef _OPENTMF_OSCILLOSCOPE_H_
+#define _OPENTMF_OSCILLOSCOPE_H_
 
-#include "internal.h"
+#include "common.h"
 
-#define HANDLE_ADD_REF(handle) { (handle)->ref_count++; }
-#define HANDLE_RELEASE_REF(handle) { if(--((handle)->ref_count) == 0){ free_handle(handle); } }
+#ifdef OPENTMF_DRIVER
 
-int create_handle(struct opentmf_context* ctx, struct opentmf_handle** handle);
-void free_handle(struct opentmf_handle* handle);
-int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opentmf_handle** handle);
-size_t get_seperator_pos(const char* str, const char seperator);
+#ifndef OPENTMF_OS_API_VERSION
+  #warning "OPENTMF_OS_API_VERSION not defined, defaulting to disabled (0x0000)"
+  #define OPENTMF_OS_API_VERSION  0x0000
+#endif
+
+#if OPENTMF_OS_API_VERSION > 0x0000
+OPENTMF_API uint16_t opentmf_os_get_version();
+OPENTMF_API int opentmf_os_open(void* driver_data, const char* id, void** device_data);
+OPENTMF_API void opentmf_os_close(void* device_data);
+OPENTMF_API const struct opentmf_device_info* opentmf_os_get_info(void* device_data);
+#endif
+
+#else
+#endif
 
 #endif

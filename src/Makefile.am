@@ -10,6 +10,13 @@ libopentmf_la_SOURCES = \
 	core.c \
 	driver.h \
 	driver.c \
+	device.c \
+	oscilloscope.h \
+	oscilloscope.c \
+	datalogger.h \
+	datalogger.c \
+	functiongenerator.h \
+	functiongenerator.c \
 	utils.h
 
 libopentmf_la_CFLAGS = \

@@ -23,5 +23,9 @@
 #include <opentmf/common.h>
 #include <opentmf/core.h>
 #include <opentmf/driver.h>
+#include <opentmf/device.h>
+#include <opentmf/oscilloscope.h>
+#include <opentmf/datalogger.h>
+#include <opentmf/functiongenerator.h>
 
 #endif

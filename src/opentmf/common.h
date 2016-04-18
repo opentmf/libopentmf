@@ -52,6 +52,9 @@ enum opentmf_handle_type
 {
   OPENTMF_HT_INVALID = 0,
   OPENTMF_HT_DRIVER = 1,
+  OPENTMF_HT_OSCILLOSCOPE = 2,
+  OPENTMF_HT_DATALOGGER = 3,
+  OPENTMF_HT_FUNCTIONGENERATOR = 4,
 };
 
 struct opentmf_version

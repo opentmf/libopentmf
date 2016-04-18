@@ -41,9 +41,13 @@ struct opentmf_handle
   size_t ref_count;
   enum opentmf_handle_type type;
   struct opentmf_context* ctx;
+  struct opentmf_handle* driver_handle;
   void* handle_data;
   void* private_data;
   void (*close)(struct opentmf_handle* handle);
 };
+
+#define CHECK_HANDLE_TYPE if(handle->type != HANDLE_TYPE) { return OPENTMF_E_INVALID_HANDLE; }
+#define CHECK_POINTER(x) if(!(x)) { return OPENTMF_E_INVALID_VALUE; }
 
 #endif

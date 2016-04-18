@@ -41,8 +41,12 @@ struct opentmf_driver_info
 OPENTMF_API int opentmf_drv_init(void** context_data);
 OPENTMF_API void opentmf_drv_fini(void* context_data);
 OPENTMF_API const struct opentmf_driver_info* opentmf_drv_get_info();
+OPENTMF_API int opentmf_drv_get_device_list(char*** list);
+OPENTMF_API void opentmf_drv_free_device_list(char** list);
 #else
 OPENTMF_API const struct opentmf_driver_info* opentmf_drv_get_info(struct opentmf_handle* handle);
+OPENTMF_API int opentmf_drv_get_device_list(struct opentmf_handle* handle, char*** list);
+OPENTMF_API int opentmf_drv_free_device_list(struct opentmf_handle* handle, char** list);
 #endif
 
 #endif

@@ -188,13 +188,7 @@ int opentmf_close(struct opentmf_handle* handle)
   if(!handle)
     return OPENTMF_E_INVALID_PARAM;
 
-  if(--handle->ref_count == 0)
-  {
-    handle->ctx->ref_count--;
-    if(handle->close)
-      handle->close(handle);
-    free(handle);
-  }
+  HANDLE_RELEASE_REF(handle);
 
   return OPENTMF_SUCCESS;
 }
@@ -205,6 +199,7 @@ int opentmf_open(struct opentmf_context* ctx, const char* url, struct opentmf_ha
   if(strncmp(url, PROTOCOL_OPENTMF, strlen(PROTOCOL_OPENTMF)) == 0)
   {
     struct opentmf_handle* driver_handle;
+    struct opentmf_handle* device_handle = NULL;
     const char* id = url + strlen(PROTOCOL_OPENTMF);
 
     if((r = get_driver_handle(ctx, &id, &driver_handle)) != OPENTMF_SUCCESS)
@@ -215,8 +210,15 @@ int opentmf_open(struct opentmf_context* ctx, const char* url, struct opentmf_ha
       *handle = driver_handle;
       return OPENTMF_SUCCESS;
     }
-    else
-      r = OPENTMF_E_INVALID_URL;
+    else if((r = create_handle(ctx, &device_handle)) == OPENTMF_SUCCESS &&
+            (r = drv_open_device(driver_handle, id, device_handle)) == OPENTMF_SUCCESS)
+    {
+      *handle = device_handle;
+      return OPENTMF_SUCCESS;
+    }
+
+    if(device_handle)
+      opentmf_close(device_handle);
 
     opentmf_close(driver_handle);
   }
@@ -232,20 +234,29 @@ int opentmf_get_handle_type(struct opentmf_handle* handle)
   return OPENTMF_HT_INVALID;
 }
 
-int create_handle(struct opentmf_context* ctx, struct opentmf_handle** handle, enum opentmf_handle_type type)
+int create_handle(struct opentmf_context* ctx, struct opentmf_handle** handle)
 {
   struct opentmf_handle* new_handle = calloc(1, sizeof(*new_handle));
   if(!new_handle)
     return OPENTMF_E_NO_MEMORY;
 
   new_handle->ref_count = 1;
-  new_handle->type = type;
   new_handle->ctx = ctx;
   *handle = new_handle;
 
   ctx->ref_count++;
 
   return OPENTMF_SUCCESS;
+}
+
+void free_handle(struct opentmf_handle* handle)
+{
+  handle->ctx->ref_count--;
+  if(handle->close)
+    handle->close(handle);
+  if(handle->driver_handle)
+    HANDLE_RELEASE_REF(handle->driver_handle);
+  free(handle);
 }
 
 int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opentmf_handle** handle)
@@ -266,7 +277,7 @@ int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opent
   {
     if(strcmp(driver->name, driver_name) == 0)
     {
-      driver->handle->ref_count++;
+      HANDLE_ADD_REF(driver->handle);
       driver_handle = driver->handle;
       break;
     }
@@ -314,12 +325,14 @@ int get_driver_handle(struct opentmf_context* ctx, const char** id, struct opent
     if(path[0] == '\0' || !(dl_handle = dlopen(path, RTLD_NOW)))
       return OPENTMF_E_INVALID_URL;
 
-    int r = create_handle(ctx, &driver_handle, OPENTMF_HT_DRIVER);
+    int r = create_handle(ctx, &driver_handle);
     if(r != OPENTMF_SUCCESS)
     {
       dlclose(dl_handle);
       return r;
     }
+
+    driver_handle->type = OPENTMF_HT_DRIVER;
 
     if((r = drv_open(driver_handle, dl_handle)) != OPENTMF_SUCCESS)
     {

@@ -20,7 +20,11 @@
 #ifndef _UTILS_H_
 #define _UTILS_H_
 
+#define API_VERSION(major,minor) (major << 8 | minor)
+
 #define LOAD_MAN_FUNC(x) if(!(LOAD_OPT_FUNC(x))) { return OPENTMF_E_FAILED; }
-#define LOAD_OPT_FUNC(x) HANDLE_DATA->x = dlsym(driver, "opentmf_" #x)
+
+#define DEVICE_DATA (handle->private_data)
+#define DRIVER_API (HANDLE_DATA->api)
 
 #endif
